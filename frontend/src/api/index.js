@@ -5,8 +5,24 @@ import { getPendingOrders, removePendingOrder, savePendingOrder } from './offlin
 const api = axios.create({
   baseURL: APP_CONFIG.apiBaseUrl,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
+  timeout: 30000,
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const url = error.config?.baseURL
+      ? `${error.config.baseURL}${error.config.url}`
+      : error.config?.url;
+    console.error('[API Error]', {
+      url,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    return Promise.reject(error);
+  },
+);
 
 export async function fetchCategories() {
   const { data } = await api.get('/categories/');

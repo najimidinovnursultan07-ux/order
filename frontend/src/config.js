@@ -1,8 +1,16 @@
+function resolveApiBaseUrl() {
+  const raw =
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE ||
+    '/api';
+  return raw.endsWith('/') ? raw.slice(0, -1) : raw;
+}
+
 export const APP_CONFIG = {
   cafeName: 'Coffee House',
   currency: 'сом',
   whatsappNumber: '996700123456',
-  apiBaseUrl: import.meta.env.VITE_API_URL || '/api',
+  apiBaseUrl: resolveApiBaseUrl(),
   pollIntervalMs: 5000,
 };
 

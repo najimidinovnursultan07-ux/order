@@ -24,15 +24,20 @@ export function MenuProvider({ children }) {
       setProducts(prods);
       await cacheMenuData(cats, prods);
     } catch (err) {
+      console.error('Не удалось загрузить меню:', err);
       const cached = await getCachedMenuData();
       if (cached.categories && cached.products) {
         setCategories(cached.categories);
         setProducts(cached.products);
         setError('Оффлайн режим — показано сохранённое меню');
       } else {
-        const hint = err?.message?.includes('Network')
-          ? 'Сервер недоступен. Запустите Django: python manage.py runserver'
-          : 'Не удалось загрузить меню. Проверьте, что бэкенд запущен на :8000';
+        const status = err?.response?.status;
+        const hint =
+          status === 404
+            ? 'API не найден. Проверьте VITE_API_URL на Vercel.'
+            : err?.code === 'ERR_NETWORK' || err?.message?.includes('Network')
+              ? 'Сервер недоступен. Проверьте, что Render-бэкенд запущен.'
+              : `Не удалось загрузить меню${status ? ` (HTTP ${status})` : ''}.`;
         setError(hint);
       }
     } finally {
