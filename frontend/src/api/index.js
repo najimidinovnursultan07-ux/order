@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { APP_CONFIG } from '../config';
 import { getPendingOrders, removePendingOrder, savePendingOrder } from './offlineStore';
+import { normalizeListResponse } from './utils';
 
 const api = axios.create({
   baseURL: APP_CONFIG.apiBaseUrl,
@@ -24,19 +25,19 @@ api.interceptors.response.use(
   },
 );
 
-export async function fetchCategories() {
-  const { data } = await api.get('/categories/');
-  return data.results ?? data;
+export async function fetchCategories(params = {}) {
+  const { data } = await api.get('/categories/', { params });
+  return normalizeListResponse(data);
 }
 
 export async function fetchProducts(params = {}) {
   const { data } = await api.get('/products/', { params });
-  return data.results ?? data;
+  return normalizeListResponse(data);
 }
 
 export async function fetchOrders() {
   const { data } = await api.get('/orders/');
-  return data.results ?? data;
+  return normalizeListResponse(data);
 }
 
 export async function fetchOrder(orderId) {
@@ -99,7 +100,7 @@ export async function deleteProduct(id) {
 
 export async function fetchAlerts(params = {}) {
   const { data } = await api.get('/alerts/', { params });
-  return data.results ?? data;
+  return normalizeListResponse(data);
 }
 
 export async function createAlert(payload) {

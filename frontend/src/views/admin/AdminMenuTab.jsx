@@ -95,11 +95,13 @@ function ProductForm({ categories, onSave, onCancel, initial }) {
           onChange={(e) => setForm({ ...form, category: e.target.value })}
           className="flex-1 px-4 py-3 rounded-xl bg-apple-bg border-0 text-sm focus:ring-2 focus:ring-apple-accent outline-none"
         >
-          {categories.map((c) => (
+          {Array.isArray(categories)
+            ? categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.icon} {c.name}
             </option>
-          ))}
+          ))
+            : null}
         </select>
       </div>
 
@@ -172,8 +174,8 @@ export default function AdminMenuTab() {
     setLoading(true);
     try {
       const [cats, prods] = await Promise.all([fetchCategories(), fetchProducts()]);
-      setCategories(cats);
-      setProducts(prods);
+      setCategories(Array.isArray(cats) ? cats : []);
+      setProducts(Array.isArray(prods) ? prods : []);
     } catch {
       alert('Не удалось загрузить меню');
     } finally {
@@ -242,7 +244,8 @@ export default function AdminMenuTab() {
       )}
 
       <div className="space-y-3">
-        {products.map((product) => (
+        {Array.isArray(products)
+          ? products.map((product) => (
           <div
             key={product.id}
             className={`bg-white rounded-2xl p-4 shadow-card flex gap-3 ${
@@ -297,7 +300,8 @@ export default function AdminMenuTab() {
               </div>
             </div>
           </div>
-        ))}
+        ))
+          : null}
       </div>
     </div>
   );

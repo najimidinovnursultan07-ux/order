@@ -20,15 +20,20 @@ export function MenuProvider({ children }) {
         fetchCategories(),
         fetchProducts({ available: 'true' }),
       ]);
-      setCategories(cats);
-      setProducts(prods);
-      await cacheMenuData(cats, prods);
+      setCategories(Array.isArray(cats) ? cats : []);
+      setProducts(Array.isArray(prods) ? prods : []);
+      await cacheMenuData(
+        Array.isArray(cats) ? cats : [],
+        Array.isArray(prods) ? prods : [],
+      );
     } catch (err) {
       console.error('Не удалось загрузить меню:', err);
       const cached = await getCachedMenuData();
-      if (cached.categories && cached.products) {
-        setCategories(cached.categories);
-        setProducts(cached.products);
+      const cachedCats = Array.isArray(cached.categories) ? cached.categories : [];
+      const cachedProds = Array.isArray(cached.products) ? cached.products : [];
+      if (cachedCats.length || cachedProds.length) {
+        setCategories(cachedCats);
+        setProducts(cachedProds);
         setError('Оффлайн режим — показано сохранённое меню');
       } else {
         const status = err?.response?.status;

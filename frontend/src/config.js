@@ -1,10 +1,4 @@
-function resolveApiBaseUrl() {
-  const raw =
-    import.meta.env.VITE_API_URL ||
-    import.meta.env.VITE_API_BASE ||
-    '/api';
-  return raw.endsWith('/') ? raw.slice(0, -1) : raw;
-}
+import { resolveApiBaseUrl } from './api/utils';
 
 export const APP_CONFIG = {
   cafeName: 'Coffee House',

@@ -17,10 +17,12 @@ export default function MenuView() {
   const { addItem } = useCart();
   const [activeCategory, setActiveCategory] = useState(null);
 
+  const safeProducts = Array.isArray(products) ? products : [];
+
   const filteredProducts = useMemo(() => {
-    if (!activeCategory) return products;
-    return products.filter((p) => p.category === activeCategory);
-  }, [products, activeCategory]);
+    if (!activeCategory) return safeProducts;
+    return safeProducts.filter((p) => p.category === activeCategory);
+  }, [safeProducts, activeCategory]);
 
   return (
     <OrderStatusProvider>
@@ -46,9 +48,11 @@ export default function MenuView() {
         ) : filteredProducts.length === 0 ? (
           <p className="col-span-full text-center text-apple-muted py-20">Меню пока пусто</p>
         ) : (
-          filteredProducts.map((product) => (
+          Array.isArray(filteredProducts)
+            ? filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} onAdd={addItem} />
           ))
+            : null
         )}
       </main>
 

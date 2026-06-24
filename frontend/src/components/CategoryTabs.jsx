@@ -1,5 +1,5 @@
 export default function CategoryTabs({ categories, activeId, onSelect }) {
-  if (!categories.length) return null;
+  if (!Array.isArray(categories) || !categories.length) return null;
 
   return (
     <div className="sticky top-[73px] z-20 bg-apple-bg/95 backdrop-blur-sm py-3">
@@ -16,7 +16,8 @@ export default function CategoryTabs({ categories, activeId, onSelect }) {
           <span>🍽️</span>
           <span>Все</span>
         </button>
-        {categories.map((cat) => (
+        {Array.isArray(categories)
+          ? categories.map((cat) => (
           <button
             key={cat.id}
             type="button"
@@ -30,7 +31,8 @@ export default function CategoryTabs({ categories, activeId, onSelect }) {
             <span className="text-base">{cat.icon}</span>
             <span>{cat.name}</span>
           </button>
-        ))}
+        ))
+          : null}
       </div>
     </div>
   );
