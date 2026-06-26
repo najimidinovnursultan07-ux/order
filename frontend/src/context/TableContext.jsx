@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-const TABLE_STORAGE_KEY = 'qr_table_number';
+const TABLE_STORAGE_KEY = 'selected_table';
 
 const TableContext = createContext(null);
 

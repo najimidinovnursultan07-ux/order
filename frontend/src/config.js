@@ -4,6 +4,8 @@ export const APP_CONFIG = {
   cafeName: 'Coffee House',
   currency: 'сом',
   whatsappNumber: '996700123456',
+  frontendUrl:
+    import.meta.env.VITE_FRONTEND_URL || 'https://order-brown-eight.vercel.app',
   apiBaseUrl: resolveApiBaseUrl(),
   pollIntervalMs: 5000,
 };

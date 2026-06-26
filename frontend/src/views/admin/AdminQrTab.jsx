@@ -8,7 +8,7 @@ export default function AdminQrTab() {
   const [tableNum, setTableNum] = useState('1');
   const canvasRef = useRef(null);
 
-  const menuUrl = `${window.location.origin}/?table=${encodeURIComponent(tableNum)}`;
+  const menuUrl = `${APP_CONFIG.frontendUrl.replace(/\/+$/, '')}/?table=${encodeURIComponent(tableNum)}`;
 
   const downloadPng = () => {
     const canvas = canvasRef.current?.querySelector('canvas');

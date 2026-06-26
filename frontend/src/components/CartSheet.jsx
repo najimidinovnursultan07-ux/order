@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createOrder } from '../api';
-import { formatOrderMessage, formatPrice, getTableLabel, getWhatsAppUrl } from '../config';
+import { formatOrderMessage, formatPrice } from '../config';
 import { useCart } from '../context/CartContext';
 import { useOrderStatus } from '../context/OrderStatusContext';
 import { useTable } from '../context/TableContext';
@@ -66,10 +66,9 @@ export default function CartSheet() {
     setOrderError(null);
 
     const orderText = formatOrderMessage(tableNumber, items, total);
-    const tableForBackend = getTableLabel(tableNumber);
 
     const payload = {
-      table_number: String(tableForBackend),
+      table_number: String(tableNumber),
       customer_phone: customerPhone.trim(),
       items: items.map((i) => ({
         product_id: i.product.id,
@@ -80,7 +79,7 @@ export default function CartSheet() {
     try {
       const result = await createOrder(payload);
       if (result.offline) {
-        throw new Error('Нет связи с сервером. Запустите бэкенд и попробуйте снова.');
+        throw new Error('Нет связи с сервером. Попробуйте позже.');
       }
       if (result.data?.id) {
         trackOrder(result.data.id);
@@ -88,9 +87,8 @@ export default function CartSheet() {
 
       try {
         await sendTelegramMessage(orderText);
-        window.open(getWhatsAppUrl(orderText), '_blank');
       } catch {
-        /* Telegram/WhatsApp не блокируют сохранение заказа */
+        /* Telegram не блокирует сохранение заказа на бэкенде */
       }
 
       clearCart();
@@ -210,7 +208,7 @@ export default function CartSheet() {
 
               <div className="mb-4">
                 <label htmlFor="customer-phone" className="block text-sm font-medium text-apple-text mb-2">
-                  WhatsApp для уведомлений (необязательно)
+                  Телефон для уведомлений (необязательно)
                 </label>
                 <input
                   id="customer-phone"

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { MenuProvider } from './context/MenuContext';
@@ -6,6 +7,14 @@ import MenuView from './views/MenuView';
 import AdminView from './views/AdminView';
 
 export default function App() {
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const table = queryParams.get('table');
+    if (table) {
+      localStorage.setItem('selected_table', table.trim());
+    }
+  }, []);
+
   return (
     <MenuProvider>
       <CartProvider>
