@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  buildProductFormData,
   createProduct,
   deleteProduct,
   fetchCategories,
   fetchProducts,
+  formatValidationErrors,
   updateProduct,
 } from '../../api';
 import { formatPrice } from '../../config';
@@ -16,31 +18,57 @@ const PLACEHOLDER =
   );
 
 function ProductForm({ categories, onSave, onCancel, initial }) {
+  const defaultCategoryId =
+    initial?.category != null && initial.category !== ''
+      ? Number(initial.category)
+      : categories[0]?.id != null
+        ? Number(categories[0].id)
+        : '';
+
   const [form, setForm] = useState({
     name: initial?.name || '',
     description: initial?.description || '',
-    price: initial?.price || '',
-    category: initial?.category || (categories[0]?.id ?? ''),
+    price: initial?.price ?? '',
+    category: defaultCategoryId,
     is_available: initial?.is_available ?? true,
     is_bestseller: initial?.is_bestseller ?? false,
     is_spicy: initial?.is_spicy ?? false,
   });
   const [image, setImage] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  const categoryId = Number(form.category);
+  const hasValidCategory = Number.isInteger(categoryId) && categoryId > 0;
+  const hasValidPrice = form.price !== '' && !Number.isNaN(Number(form.price)) && Number(form.price) >= 0;
+  const canSubmit = hasValidCategory && hasValidPrice && form.name.trim().length > 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaveError('');
+
+    if (!hasValidCategory) {
+      setSaveError('Выберите категорию перед сохранением.');
+      return;
+    }
+
+    if (!hasValidPrice) {
+      setSaveError('Укажите корректную цену.');
+      return;
+    }
+
     setSaving(true);
 
-    const fd = new FormData();
-    fd.append('name', form.name);
-    fd.append('description', form.description);
-    fd.append('price', form.price);
-    fd.append('category', form.category);
-    fd.append('is_available', form.is_available);
-    fd.append('is_bestseller', form.is_bestseller);
-    fd.append('is_spicy', form.is_spicy);
-    if (image) fd.append('image', image);
+    const fd = buildProductFormData({
+      name: form.name,
+      description: form.description,
+      price: form.price,
+      category: categoryId,
+      is_available: form.is_available,
+      is_bestseller: form.is_bestseller,
+      is_spicy: form.is_spicy,
+      image,
+    });
 
     try {
       if (initial?.id) {
@@ -49,8 +77,11 @@ function ProductForm({ categories, onSave, onCancel, initial }) {
         await createProduct(fd);
       }
       onSave();
-    } catch {
-      alert('Ошибка сохранения');
+    } catch (error) {
+      console.error('ПОЛНЫЙ ОТВЕТ ОШИБКИ БЭКЕНДА:', error.response?.data);
+      const message = formatValidationErrors(error.response?.data);
+      setSaveError(message);
+      alert(`Ошибка сохранения:\n\n${message}`);
     } finally {
       setSaving(false);
     }
@@ -61,6 +92,19 @@ function ProductForm({ categories, onSave, onCancel, initial }) {
       <h3 className="font-semibold text-apple-text">
         {initial ? 'Редактировать блюдо' : 'Новое блюдо'}
       </h3>
+
+      {saveError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 whitespace-pre-wrap">
+          {saveError}
+        </div>
+      )}
+
+      {!Array.isArray(categories) || categories.length === 0 ? (
+        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          Нет категорий на сервере. Сначала добавьте категории через Django Admin или команду{' '}
+          <code className="text-xs">seed_demo</code>.
+        </p>
+      ) : null}
 
       <input
         type="text"
@@ -92,9 +136,16 @@ function ProductForm({ categories, onSave, onCancel, initial }) {
         />
         <select
           value={form.category}
-          onChange={(e) => setForm({ ...form, category: e.target.value })}
-          className="flex-1 px-4 py-3 rounded-xl bg-apple-bg border-0 text-sm focus:ring-2 focus:ring-apple-accent outline-none"
+          onChange={(e) => setForm({ ...form, category: Number(e.target.value) })}
+          required
+          disabled={!categories.length}
+          className="flex-1 px-4 py-3 rounded-xl bg-apple-bg border-0 text-sm focus:ring-2 focus:ring-apple-accent outline-none disabled:opacity-50"
         >
+          {!hasValidCategory && (
+            <option value="" disabled>
+              Выберите категорию
+            </option>
+          )}
           {Array.isArray(categories)
             ? categories.map((c) => (
             <option key={c.id} value={c.id}>
@@ -108,7 +159,7 @@ function ProductForm({ categories, onSave, onCancel, initial }) {
       <input
         type="file"
         accept="image/*"
-        onChange={(e) => setImage(e.target.files[0])}
+        onChange={(e) => setImage(e.target.files?.[0] ?? null)}
         className="text-sm text-apple-muted"
       />
 
@@ -146,7 +197,7 @@ function ProductForm({ categories, onSave, onCancel, initial }) {
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || !canSubmit}
           className="flex-1 py-3 rounded-xl bg-apple-accent text-white font-medium text-sm disabled:opacity-50"
         >
           {saving ? 'Сохранение...' : 'Сохранить'}
@@ -188,10 +239,22 @@ export default function AdminMenuTab() {
   }, [load]);
 
   const handleToggleAvailable = async (product) => {
-    const fd = new FormData();
-    fd.append('is_available', !product.is_available);
-    await updateProduct(product.id, fd);
-    load();
+    const fd = buildProductFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      is_available: !product.is_available,
+      is_bestseller: product.is_bestseller,
+      is_spicy: product.is_spicy,
+    });
+    try {
+      await updateProduct(product.id, fd);
+      load();
+    } catch (error) {
+      console.error('ПОЛНЫЙ ОТВЕТ ОШИБКИ БЭКЕНДА:', error.response?.data);
+      alert(`Ошибка обновления:\n\n${formatValidationErrors(error.response?.data)}`);
+    }
   };
 
   const handleDelete = async (id) => {

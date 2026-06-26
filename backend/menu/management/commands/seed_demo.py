@@ -4,50 +4,77 @@ from django.core.management.base import BaseCommand
 
 from menu.models import Category, Product
 
+DEMO_CATEGORIES = [
+    {'name': 'Кофе', 'icon': '☕', 'sort_order': 1},
+    {'name': 'Чай', 'icon': '🍵', 'sort_order': 2},
+    {'name': 'Десерты', 'icon': '🍰', 'sort_order': 3},
+    {'name': 'Выпечка', 'icon': '🥐', 'sort_order': 4},
+]
+
+# (category_name, product_name, description, price)
+DEMO_PRODUCTS = [
+    ('Кофе', 'Капучино', 'Эспрессо с нежной молочной пенкой', Decimal('180')),
+    ('Кофе', 'Латте', 'Кофе с молоком и лёгкой пенкой', Decimal('200')),
+    ('Кофе', 'Американо', 'Классический чёрный кофе', Decimal('150')),
+    ('Чай', 'Зелёный чай', 'Свежезаваренный зелёный чай', Decimal('120')),
+    ('Чай', 'Чёрный чай', 'Ароматный чёрный чай с лимоном', Decimal('120')),
+    ('Чай', 'Молочный улун', 'Тайваньский улун с карамельными нотами', Decimal('160')),
+    ('Десерты', 'Чизкейк', 'Нью-Йоркский чизкейк', Decimal('280')),
+    ('Десерты', 'Тирамису', 'Итальянский десерт с маскарпоне', Decimal('320')),
+    ('Десерты', 'Медовик', 'Классический медовый торт', Decimal('250')),
+    ('Выпечка', 'Круассан', 'Слоёная французская выпечка', Decimal('140')),
+    ('Выпечка', 'Булочка с корицей', 'Мягкая булочка с корицей и глазурью', Decimal('130')),
+    ('Выпечка', 'Маффин', 'Шоколадный маффин', Decimal('150')),
+]
+
 
 class Command(BaseCommand):
-    help = 'Заполняет базу демо-данными для QR-меню'
+    help = 'Заполняет базу демо-категориями и товарами (без дублирования при повторном запуске)'
 
     def handle(self, *args, **options):
-        Category.objects.all().delete()
-        Product.objects.all().delete()
-
-        categories = [
-            {'name': 'Пицца', 'icon': '🍕', 'sort_order': 1},
-            {'name': 'Кофе', 'icon': '☕', 'sort_order': 2},
-            {'name': 'Десерты', 'icon': '🍰', 'sort_order': 3},
-            {'name': 'Напитки', 'icon': '🥤', 'sort_order': 4},
-        ]
+        if Category.objects.exists():
+            self.stdout.write(
+                self.style.WARNING('Категории уже есть в базе — создаём только недостающие записи.')
+            )
 
         cat_map = {}
-        for cat_data in categories:
-            cat = Category.objects.create(**cat_data)
-            cat_map[cat.name] = cat
-            self.stdout.write(f'  + Категория: {cat.name}')
+        categories_created = 0
 
-        products = [
-            ('Пицца', 'Пепперони', 'Классическая пицца с пепперони и моцареллой', Decimal('450')),
-            ('Пицца', 'Маргарита', 'Томаты, моцарелла, свежий базилик', Decimal('380')),
-            ('Пицца', '4 Сыра', 'Горгонзола, пармезан, моцарелла, чеддер', Decimal('520')),
-            ('Кофе', 'Капучино', 'Эспрессо с молочной пенкой', Decimal('180')),
-            ('Кофе', 'Латте', 'Нежный кофе с молоком', Decimal('200')),
-            ('Кофе', 'Американо', 'Классический черный кофе', Decimal('150')),
-            ('Кофе', 'Раф', 'Кофе со сливками и ванилью', Decimal('220')),
-            ('Десерты', 'Чизкейк', 'Нью-Йоркский чизкейк', Decimal('280')),
-            ('Десерты', 'Тирамису', 'Итальянский десерт с маскарпоне', Decimal('320')),
-            ('Десерты', 'Медовик', 'Классический медовый торт', Decimal('250')),
-            ('Напитки', 'Лимонад', 'Домашний лимонад с мятой', Decimal('160')),
-            ('Напитки', 'Смузи', 'Ягодный смузи', Decimal('240')),
-        ]
-
-        for cat_name, name, desc, price in products:
-            Product.objects.create(
-                category=cat_map[cat_name],
-                name=name,
-                description=desc,
-                price=price,
-                is_available=True,
+        for cat_data in DEMO_CATEGORIES:
+            cat, created = Category.objects.get_or_create(
+                name=cat_data['name'],
+                defaults={
+                    'icon': cat_data['icon'],
+                    'sort_order': cat_data['sort_order'],
+                },
             )
-            self.stdout.write(f'  + Товар: {name}')
+            cat_map[cat.name] = cat
+            if created:
+                categories_created += 1
+                self.stdout.write(f'  + Категория: {cat.name}')
+            else:
+                self.stdout.write(f'  · Категория уже есть: {cat.name}')
 
-        self.stdout.write(self.style.SUCCESS('Демо-данные успешно загружены!'))
+        products_created = 0
+        for cat_name, name, desc, price in DEMO_PRODUCTS:
+            category = cat_map[cat_name]
+            _product, created = Product.objects.get_or_create(
+                category=category,
+                name=name,
+                defaults={
+                    'description': desc,
+                    'price': price,
+                    'is_available': True,
+                },
+            )
+            if created:
+                products_created += 1
+                self.stdout.write(f'  + Товар: {name}')
+            else:
+                self.stdout.write(f'  · Товар уже есть: {name}')
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f'Готово: категорий +{categories_created}, товаров +{products_created}.'
+            )
+        )

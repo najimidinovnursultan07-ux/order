@@ -19,6 +19,7 @@ venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py seed_demo
+python manage.py create_admin
 python manage.py runserver
 ```
 
@@ -87,6 +88,46 @@ python manage.py migrate
 ```
 
 Без переменных окружения используется SQLite.
+
+## Деплой (Render)
+
+В настройках Web Service:
+
+| Поле | Значение |
+|------|----------|
+| **Root Directory** | `backend` |
+| **Build Command** | `pip install -r requirements.txt && python manage.py collectstatic --noinput` |
+| **Start Command** | `bash start.sh` |
+
+Или вручную:
+
+**Build Command** (без `migrate` — на этапе сборки БД часто недоступна):
+
+```bash
+pip install -r requirements.txt && python manage.py collectstatic --noinput
+```
+
+**Start Command** (миграции + данные + запуск сервера):
+
+```bash
+python manage.py migrate --noinput && python manage.py create_admin && python manage.py seed_demo && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+**PostgreSQL на Render:** создайте базу и привяжите к Web Service — Render сам добавит переменную `DATABASE_URL`. Дополнительные `POSTGRES_*` не нужны.
+
+**Environment (рекомендуется):**
+
+- `DJANGO_DEBUG=False`
+- `DJANGO_SECRET_KEY` — случайная длинная строка
+
+**Миграции в Git** (`backend/menu/migrations/`): `0001`–`0003` — коммитьте в репозиторий, не генерируйте на Render.
+
+> `seed_demo` идемпотентна: при повторном деплое не дублирует категории и товары.
+
+Суперпользователь Django Admin создаётся автоматически (если ещё нет):
+
+- **Логин:** `admin`
+- **Пароль:** `admin123`
 
 ## Структура проекта
 

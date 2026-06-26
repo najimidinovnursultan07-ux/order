@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { APP_CONFIG } from '../config';
 import { getPendingOrders, removePendingOrder, savePendingOrder } from './offlineStore';
-import { normalizeListResponse } from './utils';
+import { MULTIPART_REQUEST_CONFIG, normalizeListResponse } from './utils';
 
 const api = axios.create({
   baseURL: APP_CONFIG.apiBaseUrl,
@@ -81,16 +81,12 @@ export async function updateOrderStatus(orderId, status) {
 }
 
 export async function createProduct(formData) {
-  const { data } = await api.post('/products/', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const { data } = await api.post('/products/', formData, MULTIPART_REQUEST_CONFIG);
   return data;
 }
 
 export async function updateProduct(id, formData) {
-  const { data } = await api.patch(`/products/${id}/`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const { data } = await api.patch(`/products/${id}/`, formData, MULTIPART_REQUEST_CONFIG);
   return data;
 }
 
@@ -112,5 +108,7 @@ export async function markAlertRead(alertId) {
   const { data } = await api.patch(`/alerts/${alertId}/read/`);
   return data;
 }
+
+export { buildProductFormData, formatValidationErrors } from './utils';
 
 export default api;

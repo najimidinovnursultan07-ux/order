@@ -25,3 +25,61 @@ export function resolveApiBaseUrl() {
 
   return url;
 }
+
+/** Axios: убрать Content-Type, чтобы браузер сам выставил boundary для FormData. */
+export const MULTIPART_REQUEST_CONFIG = {
+  transformRequest: [
+    (data, headers) => {
+      delete headers['Content-Type'];
+      return data;
+    },
+  ],
+};
+
+/**
+ * Собирает FormData для создания/обновления товара в формате DRF.
+ */
+export function buildProductFormData({
+  name,
+  description = '',
+  price,
+  category,
+  is_available = true,
+  is_bestseller = false,
+  is_spicy = false,
+  image = null,
+}) {
+  const categoryId = Number(category);
+  const priceValue = Number(price);
+
+  const fd = new FormData();
+  fd.append('name', String(name).trim());
+  fd.append('description', String(description ?? ''));
+  fd.append('price', String(priceValue));
+  fd.append('category', String(categoryId));
+  fd.append('is_available', is_available ? 'true' : 'false');
+  fd.append('is_bestseller', is_bestseller ? 'true' : 'false');
+  fd.append('is_spicy', is_spicy ? 'true' : 'false');
+
+  if (image instanceof File) {
+    fd.append('image', image);
+  }
+
+  return fd;
+}
+
+/** Человекочитаемый текст ошибок валидации DRF (400). */
+export function formatValidationErrors(data) {
+  if (!data) return 'Неизвестная ошибка сервера';
+  if (typeof data === 'string') return data;
+  if (data.detail) {
+    return typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+  }
+
+  return Object.entries(data)
+    .map(([field, messages]) => {
+      const text = Array.isArray(messages) ? messages.join(', ') : String(messages);
+      return `${field}: ${text}`;
+    })
+    .join('\n');
+}
