@@ -8,7 +8,7 @@ export default function AdminQrTab() {
   const [tableNum, setTableNum] = useState('1');
   const canvasRef = useRef(null);
 
-  const menuUrl = buildTableQrUrl(tableNum);
+  const qrUrl = buildTableQrUrl(tableNum);
 
   const downloadPng = () => {
     const canvas = canvasRef.current?.querySelector('canvas');
@@ -34,7 +34,7 @@ export default function AdminQrTab() {
     pdf.setFontSize(9);
     pdf.text('Отсканируйте для заказа', pageW / 2, 130, { align: 'center' });
     pdf.setFontSize(7);
-    pdf.text(menuUrl, pageW / 2, 138, { align: 'center', maxWidth: pageW - 20 });
+    pdf.text(qrUrl, pageW / 2, 138, { align: 'center', maxWidth: pageW - 20 });
     pdf.save(`qr-table-${tableNum}.pdf`);
   };
 
@@ -68,14 +68,14 @@ export default function AdminQrTab() {
           className="flex flex-col items-center p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200 mb-4"
         >
           <QRCodeCanvas
-            value={menuUrl.trim()}
+            value={qrUrl}
             size={200}
             level="H"
             includeMargin
             bgColor="#ffffff"
             fgColor="#1d1d1f"
           />
-          <p className="text-xs text-slate-400 mt-4 break-all text-center">{menuUrl}</p>
+          <p className="text-xs text-slate-400 mt-4 break-all text-center">{qrUrl}</p>
         </div>
 
         <div className="flex gap-3">

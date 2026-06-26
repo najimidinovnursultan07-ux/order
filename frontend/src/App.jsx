@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { parseTableFromLocation } from './config';
 import { CartProvider } from './context/CartContext';
 import { MenuProvider } from './context/MenuContext';
 import { TableProvider } from './context/TableContext';
@@ -8,8 +9,7 @@ import AdminView from './views/AdminView';
 
 export default function App() {
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const table = queryParams.get('table');
+    const table = parseTableFromLocation();
     if (table) {
       localStorage.setItem('selected_table', table);
       console.log(`Вы вошли со стола №${table}.`);

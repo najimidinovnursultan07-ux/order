@@ -8,12 +8,14 @@ import {
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { parseTableFromLocation } from '../config';
+
 const TABLE_STORAGE_KEY = 'selected_table';
 
 const TableContext = createContext(null);
 
 function readTableFromLocation() {
-  return new URLSearchParams(window.location.search).get('table')?.trim() || null;
+  return parseTableFromLocation();
 }
 
 function readStoredTable() {
