@@ -4,9 +4,12 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.static import serve
 
+from menu.views import TableQrRedirectView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('menu.urls')),
+    path('r/<str:table_id>/', TableQrRedirectView.as_view(), name='table-qr-redirect'),
 ]
 
 # Раздача загруженных изображений (локально и на Render без S3)

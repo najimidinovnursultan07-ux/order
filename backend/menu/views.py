@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.http import HttpResponseRedirect
+from django.views import View
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -86,3 +89,12 @@ class ServiceAlertViewSet(viewsets.ModelViewSet):
         alert.is_read = True
         alert.save(update_fields=['is_read'])
         return Response(ServiceAlertSerializer(alert).data)
+
+
+class TableQrRedirectView(View):
+    """Редирект для QR: .com домен Render → меню на Vercel (MIUI не открывает .app)."""
+
+    def get(self, request, table_id):
+        base = settings.FRONTEND_URL.rstrip('/')
+        table = str(table_id).strip()
+        return HttpResponseRedirect(f'{base}/table/{table}')

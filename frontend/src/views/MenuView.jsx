@@ -21,14 +21,10 @@ export default function MenuView() {
   useEffect(() => {
     const pathParts = window.location.pathname.split('/');
     const tableIndex = pathParts.indexOf('table');
-    const fromPath =
-      tableIndex !== -1 && pathParts[tableIndex + 1]
-        ? pathParts[tableIndex + 1].trim()
-        : null;
-    const table = tableId?.trim() || fromPath;
-    if (table) {
-      localStorage.setItem('selected_table', table);
-      console.log('Номер стола успешно сохранен:', table);
+    if (tableIndex !== -1 && pathParts[tableIndex + 1]) {
+      const tableId = pathParts[tableIndex + 1].trim();
+      localStorage.setItem('selected_table', tableId);
+      console.log('Номер стола зафиксирован из пути:', tableId);
     }
   }, [tableId]);
 

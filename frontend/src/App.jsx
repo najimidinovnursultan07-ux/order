@@ -13,7 +13,7 @@ export default function App() {
     if (tableIndex !== -1 && pathParts[tableIndex + 1]) {
       const tableId = pathParts[tableIndex + 1].trim();
       localStorage.setItem('selected_table', tableId);
-      console.log('Номер стола успешно сохранен:', tableId);
+      console.log('Номер стола зафиксирован из пути:', tableId);
     }
   }, []);
 

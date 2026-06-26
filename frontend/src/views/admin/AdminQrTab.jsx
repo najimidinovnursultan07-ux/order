@@ -60,8 +60,12 @@ export default function AdminQrTab() {
           max="999"
           value={tableNum}
           onChange={(e) => setTableNum(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-lg font-semibold outline-none focus:ring-2 focus:ring-slate-900 mb-6"
+          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-lg font-semibold outline-none focus:ring-2 focus:ring-slate-900 mb-4"
         />
+
+        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+          Формат ссылки: <strong>/table/номер</strong> — без знака вопроса, для всех сканеров.
+        </p>
 
         <div
           ref={canvasRef}

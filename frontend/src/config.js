@@ -4,7 +4,7 @@ export const APP_CONFIG = {
   cafeName: 'Coffee House',
   currency: 'сом',
   whatsappNumber: '996700123456',
-  /** Публичный URL для QR-кодов (путь /table/N — без ?table=, иначе Xiaomi видит «Т») */
+  /** Публичный URL меню и QR-кодов (путь /table/N — без ?table=) */
   menuPublicUrl: 'https://order-brown-eight.vercel.app',
   frontendUrl:
     import.meta.env.VITE_FRONTEND_URL || 'https://order-brown-eight.vercel.app',
@@ -17,7 +17,7 @@ export function cleanQrUrl(url) {
   return String(url ?? '').replace(/\s+/g, '').trim();
 }
 
-/** Ссылка для QR: https://order-brown-eight.vercel.app/table/5 (без ? — сканеры Xiaomi/Redmi) */
+/** Ссылка для QR: https://order-brown-eight.vercel.app/table/5 */
 export function buildTableQrUrl(tableNumber) {
   const table = String(tableNumber ?? '').replace(/\s+/g, '').trim();
   const rawUrl = `https://order-brown-eight.vercel.app/table/${table}`;
