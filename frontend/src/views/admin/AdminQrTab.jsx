@@ -2,13 +2,13 @@ import { useRef, useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Download, FileImage, QrCode } from 'lucide-react';
 import { jsPDF } from 'jspdf';
-import { APP_CONFIG } from '../../config';
+import { APP_CONFIG, buildTableQrUrl } from '../../config';
 
 export default function AdminQrTab() {
   const [tableNum, setTableNum] = useState('1');
   const canvasRef = useRef(null);
 
-  const menuUrl = `${APP_CONFIG.frontendUrl.replace(/\/+$/, '')}/?table=${encodeURIComponent(tableNum)}`;
+  const menuUrl = buildTableQrUrl(tableNum);
 
   const downloadPng = () => {
     const canvas = canvasRef.current?.querySelector('canvas');
@@ -68,7 +68,7 @@ export default function AdminQrTab() {
           className="flex flex-col items-center p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200 mb-4"
         >
           <QRCodeCanvas
-            value={menuUrl}
+            value={menuUrl.trim()}
             size={200}
             level="H"
             includeMargin

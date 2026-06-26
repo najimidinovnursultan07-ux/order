@@ -4,11 +4,22 @@ export const APP_CONFIG = {
   cafeName: 'Coffee House',
   currency: 'сом',
   whatsappNumber: '996700123456',
+  /** Публичный URL меню для QR-кодов (всегда Vercel, не localhost) */
+  menuPublicUrl: 'https://order-brown-eight.vercel.app',
   frontendUrl:
     import.meta.env.VITE_FRONTEND_URL || 'https://order-brown-eight.vercel.app',
   apiBaseUrl: resolveApiBaseUrl(),
   pollIntervalMs: 5000,
 };
+
+/** Ссылка для QR: https://order-brown-eight.vercel.app/?table=5 (слэш перед ? обязателен) */
+export function buildTableQrUrl(tableNumber) {
+  const base = APP_CONFIG.menuPublicUrl.trim().replace(/\/+$/, '');
+  const table = String(tableNumber ?? '').trim();
+  const url = new URL('/', `${base}/`);
+  url.searchParams.set('table', table);
+  return url.href;
+}
 
 export const TABLE_TAKEAWAY = 'takeaway';
 export const TABLE_TAKEAWAY_LABEL = 'На вынос (Самовывоз)';

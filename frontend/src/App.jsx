@@ -11,7 +11,8 @@ export default function App() {
     const queryParams = new URLSearchParams(window.location.search);
     const table = queryParams.get('table');
     if (table) {
-      localStorage.setItem('selected_table', table.trim());
+      localStorage.setItem('selected_table', table);
+      console.log(`Вы вошли со стола №${table}.`);
     }
   }, []);
 
