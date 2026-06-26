@@ -69,9 +69,9 @@ export default function AdminQrTab() {
         >
           <QRCodeCanvas
             value={qrUrl}
-            size={200}
+            size={256}
             level="H"
-            includeMargin
+            includeMargin={true}
             bgColor="#ffffff"
             fgColor="#1d1d1f"
           />

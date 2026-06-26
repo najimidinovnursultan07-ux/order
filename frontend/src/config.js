@@ -12,10 +12,16 @@ export const APP_CONFIG = {
   pollIntervalMs: 5000,
 };
 
-/** Ссылка для QR: https://order-brown-eight.vercel.app/table/5 */
+/** Очищает строку URL от пробелов и скрытых символов для QR-сканеров */
+export function cleanQrUrl(url) {
+  return String(url ?? '').replace(/\s+/g, '').trim();
+}
+
+/** Ссылка для QR: https://order-brown-eight.vercel.app/?table=5 */
 export function buildTableQrUrl(tableNumber) {
-  const table = String(tableNumber ?? '').trim();
-  return `https://order-brown-eight.vercel.app/table/${table}`.trim();
+  const table = String(tableNumber ?? '').replace(/\s+/g, '').trim();
+  const rawUrl = `https://order-brown-eight.vercel.app/?table=${table}`;
+  return cleanQrUrl(rawUrl);
 }
 
 /** Извлекает номер стола из пути /table/номер */
