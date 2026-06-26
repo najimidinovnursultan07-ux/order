@@ -12,16 +12,33 @@ export const APP_CONFIG = {
   pollIntervalMs: 5000,
 };
 
-/** Ссылка для QR — слэш перед ? обязателен для распознавания сканерами */
+/** Ссылка для QR: https://order-brown-eight.vercel.app/table/5 */
 export function buildTableQrUrl(tableNumber) {
   const table = String(tableNumber ?? '').trim();
-  return `https://order-brown-eight.vercel.app/?table=${table}`.trim();
+  return `https://order-brown-eight.vercel.app/table/${table}`.trim();
 }
 
-/** Извлекает номер стола из URL (работает и с /?table=, и с ?table=) */
+/** Извлекает номер стола из пути /table/номер */
+export function parseTableFromPath(pathname = window.location.pathname) {
+  const pathParts = pathname.split('/').filter(Boolean);
+  const tableIndex = pathParts.indexOf('table');
+  if (tableIndex !== -1 && pathParts[tableIndex + 1]) {
+    try {
+      return decodeURIComponent(pathParts[tableIndex + 1]).trim();
+    } catch {
+      return pathParts[tableIndex + 1].trim();
+    }
+  }
+  return null;
+}
+
+/** Извлекает номер стола из URL (путь /table/N или legacy ?table=N) */
 export function parseTableFromLocation(href = window.location.href) {
   try {
     const url = new URL(href);
+    const fromPath = parseTableFromPath(url.pathname);
+    if (fromPath) return fromPath;
+
     const fromSearch = url.searchParams.get('table');
     if (fromSearch?.trim()) return fromSearch.trim();
   } catch {

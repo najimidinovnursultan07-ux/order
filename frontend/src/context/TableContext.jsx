@@ -6,17 +6,13 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 
-import { parseTableFromLocation } from '../config';
+import { parseTableFromPath } from '../config';
 
 const TABLE_STORAGE_KEY = 'selected_table';
 
 const TableContext = createContext(null);
-
-function readTableFromLocation() {
-  return parseTableFromLocation();
-}
 
 function readStoredTable() {
   try {
@@ -40,9 +36,12 @@ function persistTable(value) {
 }
 
 export function TableProvider({ children }) {
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const urlTable =
-    searchParams.get('table')?.trim() || readTableFromLocation() || null;
+    parseTableFromPath(location.pathname) ||
+    searchParams.get('table')?.trim() ||
+    null;
 
   const [manualTable, setManualTable] = useState(() => readStoredTable());
 
