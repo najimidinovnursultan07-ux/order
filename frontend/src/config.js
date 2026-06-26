@@ -12,10 +12,10 @@ export const APP_CONFIG = {
   pollIntervalMs: 5000,
 };
 
-/** Ссылка для QR: https://order-brown-eight.vercel.app/?table=5 (слэш перед ? обязателен) */
+/** Ссылка для QR: https://order-brown-eight.vercel.app/table/5 */
 export function buildTableQrUrl(tableNumber) {
   const table = String(tableNumber ?? '').trim();
-  return `https://order-brown-eight.vercel.app/?table=${table}`.trim();
+  return `https://order-brown-eight.vercel.app/table/${table}`.trim();
 }
 
 /** Извлекает номер стола из пути /table/номер */

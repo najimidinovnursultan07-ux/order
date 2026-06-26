@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { Settings } from 'lucide-react';
 import ServiceButtons from '../components/ServiceButtons';
 import CartSheet from '../components/CartSheet';
@@ -13,9 +13,24 @@ import { OrderStatusProvider } from '../context/OrderStatusContext';
 import { useMenu } from '../context/MenuContext';
 
 export default function MenuView() {
+  const { tableId } = useParams();
   const { categories, products, loading, error, isOffline } = useMenu();
   const { addItem } = useCart();
   const [activeCategory, setActiveCategory] = useState(null);
+
+  useEffect(() => {
+    const pathParts = window.location.pathname.split('/');
+    const tableIndex = pathParts.indexOf('table');
+    const fromPath =
+      tableIndex !== -1 && pathParts[tableIndex + 1]
+        ? pathParts[tableIndex + 1].trim()
+        : null;
+    const table = tableId?.trim() || fromPath;
+    if (table) {
+      localStorage.setItem('selected_table', table);
+      console.log('Номер стола успешно сохранен:', table);
+    }
+  }, [tableId]);
 
   const safeProducts = Array.isArray(products) ? products : [];
 
